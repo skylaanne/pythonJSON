@@ -1,0 +1,150 @@
+# Assignment 3
+# CIS 231 / Cuesta College
+# Fall 2019 / R. Scovil
+# Skyla Urman / skylaurman@my.cuesta.edu
+
+
+import json
+
+jsonFile = open('WU-SLO-forecast-10day.json', 'r')
+data = json.load(jsonFile)
+jsonFile.close()
+
+
+forecastDict = data['forecast']
+
+
+simpleforecast = data['forecast']['simpleforecast']['forecastday']
+
+
+def dates(index):
+    for day in simpleforecast[index:]:
+        return day['date']['pretty'][15:]
+
+
+def conditions(index):
+    for nextdict in simpleforecast[index:]:
+        return nextdict['conditions']
+
+
+def high(index):
+    for high in simpleforecast[index:]:
+        return high['high']['fahrenheit'], high['high']['celsius']
+
+
+def low(index):
+    for low in simpleforecast[index:]:
+        return low['low']['fahrenheit'], low['low']['celsius']
+
+
+def humidity(index):
+    for avehumid in simpleforecast[index:]:
+        return avehumid['avehumidity']
+
+
+def wind(index):
+    for wind in simpleforecast[index:]:
+         return wind['avewind']['mph'], wind['avewind']['dir']
+
+
+def weekday(index):
+    for week in simpleforecast[index:]:
+        return week['date']['weekday']
+
+
+def month(index):
+    for month in simpleforecast[index:]:
+        return month['date']['monthname']
+
+
+def day(index):
+    for day in simpleforecast[index:]:
+        return day['date']['day']
+
+
+def year(index):
+    for year in simpleforecast[index:]:
+        return year['date']['year']
+
+
+
+
+def highAndLowOf10Day():
+    high = float(simpleforecast[0]['high']['fahrenheit'])
+    highDay = simpleforecast[0]['date']['weekday'], simpleforecast[0]['date']['monthname'], simpleforecast[0]['date']['day'], simpleforecast[0]['date']['year']
+    low = float(simpleforecast[0]['low']['fahrenheit'])
+    lowDay = simpleforecast[0]['date']['weekday'], simpleforecast[0]['date']['monthname'], simpleforecast[0]['date']['day'], simpleforecast[0]['date']['year']
+    cels = simpleforecast[0]['high']['celsius']
+    for highF in simpleforecast[1:]:
+        if float(highF['high']['fahrenheit']) > high:
+            high = float(highF['high']['fahrenheit'])
+            cels = highF['high']['celsius']
+            highDay = highF['date']['weekday'], highF['date']['monthname'],highF['date']['day'],highF['date']['year']
+    print ("\n\nThe highest temperature will occur:", highDay[0], highDay[1], highDay[2], highDay[3], "\n", '{:>20}'.format(high), "°F", '{:>10}'.format(cels), "°C")
+
+
+    for lowF in simpleforecast[1:]:
+        if float(lowF['high']['fahrenheit']) < low:
+            low = float(lowF['high']['fahrenheit'])
+            cels = lowF['high']['celsius']
+            lowDay = lowF['date']['weekday'], lowF['date']['monthname'], lowF['date']['day'], lowF['date']['year']
+    print("\nThe lowest Temperature will occur:", lowDay[0], lowDay[1], lowDay[2], lowDay[3], "\n", '{:>20}'.format(low), "°F",
+          '{:>10}'.format(cels, "°C"))
+
+
+def averages():
+    sumHigh = 0
+    sumLow=0
+
+    for temp in simpleforecast[0:10]:
+        sumHigh += float(temp['high']['fahrenheit'])
+    print("\nAverage for high temps:", "\n", '{:>20}'.format(sumHigh/10), "°F")
+
+
+    for temp in simpleforecast[0:10]:
+        sumLow += float(temp['low']['fahrenheit'])
+    print("\nAverage for low temps:", "\n" , '{:>20}'.format(sumLow/10), "°F")
+
+
+def conditionsOccurance():
+    dictOfConditions = dict()
+
+    for dicts in simpleforecast:
+        dictOfConditions[dicts['conditions']] = dictOfConditions.get(dicts['conditions'], 0) + 1
+
+    listOfTuples = (sorted(dictOfConditions.items()))
+
+    for i in range(len(listOfTuples) - 1):
+        minIndex = i
+        for j in range(i + 1, len(listOfTuples)):
+            if listOfTuples[j][1] > listOfTuples[minIndex][1]:
+                minIndex = j
+
+        temp = listOfTuples[minIndex]
+        listOfTuples[minIndex] = listOfTuples[i]
+        listOfTuples[i] = temp
+
+    print("All conditions:\n", '{:>18}'.format(listOfTuples[0][1]), listOfTuples[0][0], "\n" '{:>19}'.format(listOfTuples[1][1]), listOfTuples[1][0])
+
+
+def formatandprint():
+    for i in range(10):
+        print("\n------------------\n\nThe forecast for :", weekday(i), month(i), day(i), year(i),
+              "\n\nThe conditions are:", conditions(i),
+              "\n\nThe high temp is:", '{:>20}'.format(high(i)[0]), "°F", '{:>5}'.format(high(i)[1]), "°C",
+              "\n\nThe low temp is:", '{:>21}'.format(low(i)[0]), "°F", '{:>5}'.format(low(i)[1]), "°C",
+              "\n\nThe wind speed is:", '{:>19}'.format(wind(i)[0]), "MPH", "\n\nThe wind direction:",
+              wind(i)[1], "\n\nThe humidity is:", '{:>21}'.format(humidity(i)), "%")
+
+
+
+def roadmap ():
+    print("Skyla Urman - Assignment 3 – SLO 10-Day Forecast Summary for", dates(0), "- ", dates(9))
+    formatandprint()
+    print("\n--------------------------------------------")
+    highAndLowOf10Day()
+    averages()
+    conditionsOccurance()
+
+
+roadmap()
